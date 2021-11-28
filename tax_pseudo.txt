@@ -1,0 +1,59 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class current_state:
+    
+
+
+
+
+
+
+
+
+main function interacting with user input
+
+    print("Welcome to Taxman! How many numbers would you like to start with?")
+
+    num = getinput()
+    if (num not integer):
+        print("Please enter a positive integer.")
+        exit program (or maybe loop back)
+
+    nums = classinstance(num)
+
+    while (nums.available_nums != 0):
+        print(nums.available_nums)
+        print("What number would you like to pick?")
+        picked = getinput()
+
+        if (picked != integer):
+            print("That wasn't a number!")
+            continue
+        if (picked not in available_nums):
+            print("That's not in the list!")
+            continue
+        
+        nums.PlayerPick(picked)
+    
+    print("Game over!")
+    print(nums.take_remaining)
+
+    print("The taxman took: {list}")
+    print("You took: {list}")
+    print("final scores: you {} taxman {})
+    if your score > taxman score:
+        print("Congrats! you won!!)
+    else: # are ties possible?
+        print("Sorry, you lost. :(")
