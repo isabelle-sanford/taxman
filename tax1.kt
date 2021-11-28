@@ -1,11 +1,13 @@
 
-class GameState(val size: Int) {
-    var available:MutableSet = mutableSetOf(2..size)
-    var unavailable:MutableSet = mutableSetOf(1)
-    var taxman:MutableSet = mutableSetOf()
-    var player:MutableSet = mutableSetOf()
+data class Scores(val taxScore:Int, val playerScore:Int)
 
-    fun pick(val num: Int) {
+class GameState(val size: Int) {
+    var available:MutableSet<Int> = (2..size).asSequence().toMutableSet<Int>()
+    var unavailable:MutableSet<Int> = mutableSetOf(1)
+    var taxman:MutableSet<Int> = mutableSetOf()
+    var player:MutableSet<Int> = mutableSetOf()
+
+    fun pick(num: Int) {
         val factors = findFactors(num) 
         available.remove(num)
         player.add(num)
@@ -19,13 +21,13 @@ class GameState(val size: Int) {
                 taxman.add(f)
             }
         }
-        available, unavailable = findUnfactorable(available) // TODO
+        findUnfactorable(available) 
         
     } 
 
-    fun end():Int, Int {
-        taxman = taxman.union(unavailable)
-        return taxman.sum(), player.sum()
+    fun endGame():Scores {
+        taxman = taxman.union(unavailable).toMutableSet()
+        return Scores(taxman.sum(), player.sum())
     }
 
     // make internal? 
@@ -39,9 +41,9 @@ class GameState(val size: Int) {
         return factorsList
     }
 
-    fun findUnfactorable(s: MutableSet<Int>): MutableSet<Int>, MutableSet<Int> {
-        var newAvailable:MutableSet = mutableSetOf<Int>()
-        var newUnavailable:MutableSet = mutableSetOf<Int>()
+    fun findUnfactorable(s: MutableSet<Int>) { // I guess this is in place
+        var newAvailable:MutableList<Int> = mutableListOf<Int>()
+        var newUnavailable:MutableList<Int> = mutableListOf<Int>()
         for (num in s) {
             var factors = findFactors(num)
 
@@ -52,7 +54,8 @@ class GameState(val size: Int) {
             }
         }
 
-        return newAvailable, newUnavailable
+        available.removeAll(newUnavailable)
+        unavailable.addAll(newUnavailable)
     }
 }
 
@@ -61,7 +64,7 @@ fun main() {
     print("Welcome to Taxman! How many numbers would you like to play with?")
 
     // get input num
-    val num = readLine().toIntOrNull()
+    val num = readLine()?.toIntOrNull()
     if (num == null) {
         print("Nope! That's either nothing or not a valid number. Try again next time!")
         return
@@ -74,7 +77,7 @@ fun main() {
         println(game.available)
         println("What number would you like to pick?")
 
-        val picked = readLine().toIntOrNull()
+        val picked = readLine()?.toIntOrNull()
         if (picked == null) {
             println("That wasn't a number! Please try again.")
             continue
@@ -83,15 +86,15 @@ fun main() {
             println("That's not in the available list! Please try again.")
             continue
         }
-        game.pick(picked) // TODO
+        game.pick(picked) 
     }
 
     println("Game over!")
-    println(game.end()) // TODO
+    val finalScores:Scores = game.endGame()
 
-    println("The taxman took {game.taxman}")
-    println("You took {game.player}")
-    println("Final scores: Taxman -- {game.taxman_score}, You -- {game.player_score}")
+    println("The taxman took ${game.taxman}")
+    println("You took $game.player")
+    println("Final scores: Taxman -- ${finalScores.taxScore}, You -- ${finalScores.playerScore}")
 
 
 
