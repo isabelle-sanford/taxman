@@ -33,8 +33,8 @@ class GameState(val size: Int) {
     // make internal? 
     fun findFactors(num: Int): MutableSet<Int> { // TEST
         var factorsList = mutableSetOf(1)
-        for (n in 2..(num/2)) {
-            if (n % num == 0) {
+        for (n in 2..(num/2 + 1)) {
+            if (num % n == 0) {
                 factorsList.add(n)
             }
         }
@@ -82,18 +82,19 @@ fun main() {
             println("That wasn't a number! Please try again.")
             continue
         }
-        if (game.available.contains(picked)) {
+        if (game.available.contains(picked) == false) {
             println("That's not in the available list! Please try again.")
             continue
         }
         game.pick(picked) 
+
     }
 
     println("Game over!")
     val finalScores:Scores = game.endGame()
 
     println("The taxman took ${game.taxman}")
-    println("You took $game.player")
+    println("You took ${game.player}")
     println("Final scores: Taxman -- ${finalScores.taxScore}, You -- ${finalScores.playerScore}")
 
 
