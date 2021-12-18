@@ -180,7 +180,7 @@ func greedy(potsize int) {
 		}
 
 		g = g.pick(bestscore)
-		//fmt.Printf(" %d ", bestscore)
+		fmt.Printf(" %d ", bestscore)
 
 		if (len(g.available) < 1) {
 			//print ("d")
@@ -190,39 +190,73 @@ func greedy(potsize int) {
 
 		// fmt.Printf("\nState: %v\n", g)
 	g = g.endGame()
-	//fmt.Printf("\n%s", g.score.String())
+	fmt.Printf("\n%s", g.score.String())
 
 	// TAX then PLAYER
-	fmt.Printf("%3d %7d %7d\n", potsize, g.score.taxScore, g.score.playerScore)
+	fmt.Printf("%3d %7d %7d %7d\n", potsize, g.score.taxScore, g.score.playerScore, g.score.playerScore - g.score.taxScore)
 }
 
 
-	// ! re-copy above func once it's all WORKING
-	// func improvedGreedy(potsize int) {
-	// 	g := GameState{potsize, fakeRange(2, potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}}
+// maybe not fully improved? 
+func improvedGreedy(potsize int) {
+	g := GameState{potsize, fakeRange(2, potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}}
 
-	// 	// in the long run a runing tally of player-taxman for each might be better
+	// in the long run a running tally of player-taxman for each might be better
 
-	// 	// ! WHILE game not over {
-	// 		bestscore := 0 // will there always be a maximization > 0? bc CAN be negative
-	// 		for n := range g.available {
-	// 			nFactors := getDivisors(n)
-	// 			taxTake := sum(nFactors.intersect(g.available)) + sum(nFactors.intersect(g.unavailable)) //hmmmmmmm
+	// WHILE game not over {
+	for i := 0; i < 400; i++ {
+		bestscore := 0 // will there always be a maximization > 0? bc CAN be negative
+		bestmax := 0
+		for _, n := range g.available {
+			nFactors := getDivisors(n)
+			taxTake := fakeSum(fakeIntersect(nFactors, g.available)) + fakeSum(fakeIntersect(nFactors, g.unavailable)) //hmmmmmmm
 
-	// 			if (n - taxTake > bestscore) {
-	// 				bestscore = n
-	// 			}
-	// 		}
+			if (n - taxTake >= bestmax) { // has to be >= to pref higher number w same max score
+				bestscore = n
+				bestmax = n - taxTake
+			}
+		}
 
-	// 		bestFactors := getDivisors(bestscore)
-	// 		for b := range bestFactors {
-	// 			// ? check... ??? pick ???
-	// 		}
-	// 		g.pick(bestscore)
-	// 		print(bestscore + " ")
-		
-	// 	printf("%s", g.score.String())
-	// }
+		// 1, must have multiple divisors untaken (with non-overlapping prime factorizations?)
+		// 2, for those divisors, check availability of all multiples (maybe only multiples whose other divisors are already taken)
+		// 3, pick biggest multiple found? 
+
+		// look at available picks and see if bestscore / av is still unpicked
+		bestFactors := getDivisors(bestscore)
+		freebie := 0
+		// no we gotta scan all the numbers, or at least all which are multiples of prime factors of bs
+		for _, b := range fakeIntersect(bestFactors, g.available) {
+			// ? also check available (but smaller)? multiple freebies? h
+			if fakeContains(bestscore / b, g.unavailable) {
+				if (!fakeContains(bestscore / b, getDivisors(b))) {
+					freebie = b
+				}
+				
+			}
+		}
+		if (freebie != 0) {
+			fmt.Printf(" found freebie %d\n ", freebie)
+			g = g.pick(freebie)
+		}
+
+		g = g.pick(bestscore)
+		fmt.Printf(" %d ", bestscore)
+		//fmt.Printf(" %d - available %v\n", bestscore, g.available)
+
+		if (len(g.available) < 1) {
+			//print ("d")
+			break
+		}
+	}
+
+		// fmt.Printf("\nState: %v\n", g)
+	g = g.endGame()
+	fmt.Printf("\n%s", g.score.String())
+
+	// TAX then PLAYER
+	//fmt.Printf("%3d %7d %7d %7d\n", potsize, g.score.taxScore, g.score.playerScore, g.score.playerScore - g.score.taxScore)
+}
+
 
 	//func perlmutter(potsize int)
 
@@ -230,7 +264,7 @@ func greedy(potsize int) {
 
 	// cmd line run: go run tax2.go m OR go run tax2.go a > input.txt
 	// (not sure if that should be > or <)
-	// m = manual, a = automatic, g = greedy
+	// m = manual, a = automatic, g = greedy, i = ig
 	// maybe have required arg for pot size?
 
 
@@ -243,8 +277,14 @@ func main() {
 	potsize, _ := strconv.Atoi(os.Args[2]) 
 	myGame := GameState{potsize, fakeRange(2,potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}} // nope nope nope
 
+
+	// yknow this would be a great place for a switch statement
 	if (os.Args[1] == "g") {
 		greedy(potsize)
+	}
+
+	if (os.Args[1] == "ig") {
+		improvedGreedy(potsize)
 	}
 
 	if (os.Args[1] == "m") {
