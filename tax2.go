@@ -84,12 +84,17 @@ type GameState struct {
 // could just do 1 pot list like ["U", "A", "A", ...] instead of four separate?
 // would also be an array, which is nice
 
+func startGame(pot int) GameState {
+	return GameState{pot, fakeRange(2,pot), []int{1}, []int, []int, Scores{0,0}}
+}
+
+// TODO check chat with B re: efficient divisor calcs
 // can probs be more efficient
 // maybe whenever you find a divisor also add its pair?
 func getDivisors(num int) []int {
-	factorsList := make([]int, 0) // add 1 at start? 
+	factorsList := []int{1} // add 1 at start? 
 
-	for j := 1; j < num / 2 + 1; j++ {
+	for j := 2; j < num / 2 + 1; j++ {
 		if (num % j == 0) {
 			factorsList = append(factorsList, j) // is there really no inplace way here
 		}
@@ -98,10 +103,11 @@ func getDivisors(num int) []int {
 }
 
 func (G GameState) findUnfactorable() GameState {
-	for _, a := range G.available { // this is val not index right?
+	for _, a := range G.available { 
 		currFactors := getDivisors(a)
 
 		// intersect func would be great here
+		// todo: rewrite as if f intersect available or f intersect unavailable is nonempty
 		av := false
 		for _, f := range currFactors {
 			if (fakeContains(f, G.available) || fakeContains(f, G.unavailable)) {
@@ -110,6 +116,7 @@ func (G GameState) findUnfactorable() GameState {
 			}
 		}
 		if (!av) {
+			// have access to index here, could do the "normal" remove
 			G.available = fakeRemove(G.available, a) // inplace?? syntax?
 			G.unavailable = append(G.unavailable, a)
 		}
@@ -133,7 +140,7 @@ func (G GameState) pick(num int) GameState {
 	for _, f := range factors {
 		
 		if (fakeContains(f, G.available)) { // maybe have "remove if there" func?
-			// would be great to not have to do this twice
+			// would be great to not have to do this twice - maybe use intersect func?
 			G.taxman = append(G.taxman, f)
 			G.score.taxScore += f
 
@@ -152,7 +159,8 @@ func (G GameState) pick(num int) GameState {
 }
 
 func (G GameState) endGame() GameState {
-	// check if game should actually end
+	// todo check if game should actually end
+	
 	for _, n := range G.unavailable {
 		G.score.taxScore += n
 	}
@@ -161,7 +169,7 @@ func (G GameState) endGame() GameState {
 
 
 func greedy(potsize int) {
-	g := GameState{potsize, fakeRange(2, potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}}
+	g := GameState{potsize, fakeRange(2, potsize), []int{1}, make([]int, 0), make([]int, 0), Scores{0,0}}
 
 	// in the long run a running tally of player-taxman for each might be better
 
@@ -198,8 +206,9 @@ func greedy(potsize int) {
 
 
 // maybe not fully improved? 
+// figure out a way to have improved greedy using same code as greedy so no duplication mistakes
 func improvedGreedy(potsize int) {
-	g := GameState{potsize, fakeRange(2, potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}}
+	g := GameState{potsize, fakeRange(2, potsize), []int{1}, make([]int, 0), make([]int, 0), Scores{0,0}}
 
 	// in the long run a running tally of player-taxman for each might be better
 
@@ -278,25 +287,19 @@ func main() {
 	myGame := GameState{potsize, fakeRange(2,potsize), fakeRange(1,1), make([]int, 0), make([]int, 0), Scores{0,0}} // nope nope nope
 
 
-	// yknow this would be a great place for a switch statement
-	if (os.Args[1] == "g") {
+	switch os.Args[1] {
+	case "g":
 		greedy(potsize)
-	}
-
-	if (os.Args[1] == "ig") {
+	case "ig":
 		improvedGreedy(potsize)
-	}
-
-	if (os.Args[1] == "m") {
-		// how to do a fuckin while loop
+	case "m":
+		// TODO
+				// how to do a fuckin while loop
 		// WHILE len(game.available) > 0 {
 			println("Pick a number: ")
 			// ... how to read from stdin?
-	}
-
-	if (os.Args[1] == "a") {
-		// how to read from stdin??
-		for i := 3; i < len(os.Args); i++ { 
+	case "a":
+		for i := 3; i < len(os.Args); i++ { // 3 moves
 			picked, _ := strconv.Atoi(os.Args[i])
 			if (!fakeContains(picked, myGame.available)) {
 				fmt.Printf("next pick %d not in available, skipping\n", picked)
@@ -310,6 +313,7 @@ func main() {
 		}
 		fmt.Printf("Game over! Scores: %s", myGame.score.String())
 	}
+	// could put default case here
 }
 
 
