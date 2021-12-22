@@ -47,7 +47,7 @@ class GameState(val size: Int) {
         for (num in s) {
             var factors = findFactors(num)
 
-            if (s.intersect(factors).isNotEmpty()) {
+            if (s.intersect(factors).isNotEmpty()) {  // wait doesn't this need to check unavailable too??
                 newAvailable.add(num)
             } else {
                 newUnavailable.add(num)
