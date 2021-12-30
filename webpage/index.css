@@ -5,15 +5,24 @@ td {
   border-collapse: collapse;
 }
 
-.taxed {
-  background-color: red;
-}
-
-.picked {
-  background-color: green;
-}
-
 /* want this to be lower priority than hover factors */
 .unavailable {
   background-color: gray;
+}
+
+/* either figure out how to prioritize or give available a class */
+.available:hover {
+  background-color: magenta;
+}
+
+.hovered {
+  background-color: pink !important;
+}
+
+.taxed {
+  background-color: red !important;
+}
+
+.picked {
+  background-color: green !important;
 }

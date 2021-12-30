@@ -1,145 +1,131 @@
-var _this = this;
-// interface or class?
-var Pot = /** @class */ (function () {
-    function Pot(n) {
-        console.log("making the pot...");
-        this.size = n;
+"use strict";
+class Pot {
+    constructor(potsize) {
+        this.size = potsize;
         this.playerScore = 0;
         this.taxScore = 0;
         this.nums = []; // unnecessary?
         // this could have better variables
-        for (var i = 1; i <= n; i++) {
-            //console.log("making num " + i);
-            var cell = $("<td></td>")
+        for (let i = 1; i <= potsize; i++) {
+            let cell = $("<td></td>")
                 .text(i)
-                .attr("id", "n" + i);
+                .addClass("available")
+                .attr("id", "n" + i); // necessary?
             // calculate multiples
-            var m = [];
-            for (var j = i * 2; j < n; j += i) {
-                m.push(j);
+            let multiplesList = [];
+            for (let j = i * 2; j < potsize; j += i) {
+                multiplesList.push(j);
             }
-            this.nums.push(new PotNums(i, cell, m));
+            this.nums.push(new PotNums(i, cell, multiplesList));
         }
-        console.log("nums made!");
     }
-    Pot.prototype.pick = function (n) {
+    pick(n) {
+        console.log("picking " + n);
         if (n > this.size) {
             return null;
         }
-        var curr = this.nums[n - 1];
+        let curr = this.nums[n - 1];
         // probably don't need both clauses here
         if (curr.availableFactors < 1 || curr.playerPicked != null) {
+            console.log("that number is already picked! " + n);
             return null;
         }
         curr.pick();
         this.playerScore += n;
-        for (var _i = 0, _a = curr.multiples; _i < _a.length; _i++) {
-            var i = _a[_i];
+        for (let i of curr.multiples) {
             this.nums[i - 1].availableFactors--; // can this go below 0?
         }
-        for (var _b = 0, _c = curr.factors; _b < _c.length; _b++) {
-            var j = _c[_b];
+        for (let j of curr.factors) {
             this.nums[j - 1].tax();
         }
         // check + mark new unpickables (or just check during decrements?)
-        for (var _d = 0, _e = this.nums; _d < _e.length; _d++) {
-            var k = _e[_d];
+        for (let k of this.nums) {
             if (k.availableFactors < 1) {
-                k.cell.addClass("unavailable");
+                k.cell.addClass("unavailable").removeClass("available");
             }
         }
-    };
-    Pot.prototype.tax = function (n) {
+    }
+    tax(n) {
         if (n > this.size) {
             return null;
         }
-        var curr = this.nums[n - 1];
+        let curr = this.nums[n - 1];
         if (curr.playerPicked != null) {
             return null;
         }
         this.taxScore += n;
         curr.tax();
-        for (var _i = 0, _a = curr.multiples; _i < _a.length; _i++) {
-            var i = _a[_i];
+        for (let i of curr.multiples) {
             this.nums[i - 1].availableFactors--;
         }
-    };
-    return Pot;
-}());
-var PotNums = /** @class */ (function () {
-    function PotNums(v, c, m) {
-        // might need potsize (for multiples)
-        this.val = v;
-        this.cell = c;
-        this.factors = getDivs(v);
-        this.multiples = m;
+    }
+}
+class PotNums {
+    constructor(myVal, myCell, multiplesList) {
+        this.val = myVal;
+        this.cell = myCell;
+        this.factors = getDivs(myVal);
+        this.multiples = multiplesList;
         this.availableFactors = this.factors.length; // ?
         this.playerPicked = null;
     }
-    PotNums.prototype.pick = function () {
+    pick() {
         this.playerPicked = true;
-        this.cell.addClass("picked");
-    };
-    PotNums.prototype.tax = function () {
+        this.cell.addClass("picked").removeClass("available");
+    }
+    tax() {
         this.playerPicked = false;
-        this.cell.addClass("taxed");
+        this.cell.addClass("taxed").removeClass("available");
         // currently no need to recurse down through factors
-    };
-    return PotNums;
-}());
+    }
+}
 function getDivs(n) {
-    var rtn = [1];
-    for (var i = 2; i <= Math.sqrt(n); i++) {
+    let rtn = [1];
+    for (let i = 2; i <= Math.sqrt(n); i++) {
         if (n % i == 0) {
             rtn.push(i);
+            rtn.push(n / i);
         }
     }
     return rtn;
 }
 $("#button").on({
-    click: function () {
-        console.log("running enter...");
-        var potSize = Number($("#taxman-size").val());
+    click: () => {
+        let potSize = Number($("#taxman-size").val()); // catch non-num error
         console.log("pot size: " + potSize);
-        var p = new Pot(potSize);
-        var rowWidth = 10; // ehh
-        console.log("pot made :), first entry:");
-        console.log(p.nums[0]);
-        // NEED TO REMEMBER TO CLEAR TABLE
-        var numFullRows = Math.round(potSize / 10 - 1); // not sure the round is needed
-        var cells = p.nums.map(function (n) {
+        let p = new Pot(potSize);
+        let rowWidth = 10; // ehh
+        // ! NEED TO REMEMBER TO CLEAR TABLE
+        let numRows = Math.round(potSize / 10); // not sure the round is needed
+        let cells = p.nums.map(function (n) {
             return n.cell;
         });
-        for (var i = 0; i <= numFullRows; i++) {
-            var row = $("<tr></tr>");
-            for (var j = 0; j < rowWidth; j++) {
-                var curr = i * 10 + j;
+        console.log("first cell: ");
+        console.log(cells[0]);
+        for (let i = 0; i <= numRows; i++) {
+            let row = $("<tr></tr>");
+            // probably more elegant way to do this
+            for (let j = 0; j < rowWidth; j++) {
+                let curr = i * 10 + j;
                 if (curr >= potSize) {
                     break;
                 }
-                var cell = $("<td></td>")
-                    .text(curr)
-                    .attr("id", "n" + curr);
-                row.append(cell);
+                row.append(cells[curr][0]); // not sure about index?
             }
             $("tbody").append(row);
         }
-        // might need to set n=1 to be unavailable?
+        // ?might need to set n=1 to be unavailable?
         $("td").on({
             // is text() really the best thing to pull?
-            click: function () {
-                p.pick(Number($(_this).text()));
-            },
             mouseenter: function () {
-                console.log($(_this));
-                var cellnum = Number($(_this).text());
-                console.log("hovering over " + cellnum);
-                var t = p.nums[cellnum - 1];
+                let cellnum = Number($(this).text());
+                // console.log("hovering over " + cellnum);
+                let t = p.nums[cellnum - 1];
                 if (t.availableFactors > 0) {
-                    t.cell.css("background-color", "green"); // do this with css onhover?
+                    //t.cell.css("background-color", "green"); // do this with css onhover?
                     $("td")
                         .filter(function () {
-                        var facnum = Number($(_this).text());
+                        let facnum = Number($(this).text());
                         return (t.factors.includes(facnum) &&
                             p.nums[facnum - 1].playerPicked == null);
                     })
@@ -147,13 +133,17 @@ $("#button").on({
                 }
             },
             mouseleave: function () {
-                var cellnum = Number($(_this).text());
-                var t = p.nums[cellnum - 1];
+                let cellnum = Number($(this).text());
+                let t = p.nums[cellnum - 1];
                 if (t.availableFactors > 0) {
-                    t.cell.css("background-color", "green"); // do this with css onhover?
+                    // necessary?
+                    //t.cell.css("background-color", "white"); // do this with css onhover?
                     $("td").removeClass("hovered");
                 }
-            }
+            },
+            click: function () {
+                p.pick(Number($(this).text()));
+            },
         });
-    }
+    },
 });

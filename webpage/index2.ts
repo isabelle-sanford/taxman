@@ -1,37 +1,35 @@
-// interface or class?
 class Pot {
   size: number;
   nums: PotNums[];
   playerScore: number;
   taxScore: number;
 
-  constructor(n: number) {
-    console.log("making the pot...");
-    this.size = n;
+  constructor(potsize: number) {
+    this.size = potsize;
     this.playerScore = 0;
     this.taxScore = 0;
 
     this.nums = []; // unnecessary?
 
     // this could have better variables
-    for (let i = 1; i <= n; i++) {
-      //console.log("making num " + i);
+    for (let i = 1; i <= potsize; i++) {
       let cell = $("<td></td>")
         .text(i)
-        .attr("id", "n" + i);
+        .addClass("available")
+        .attr("id", "n" + i); // necessary?
 
       // calculate multiples
-      let m: number[] = [];
-      for (let j = i * 2; j < n; j += i) {
-        m.push(j);
+      let multiplesList: number[] = [];
+      for (let j = i * 2; j < potsize; j += i) {
+        multiplesList.push(j);
       }
 
-      this.nums.push(new PotNums(i, cell, m));
+      this.nums.push(new PotNums(i, cell, multiplesList));
     }
-    console.log("nums made!");
   }
 
   pick(n: number) {
+    console.log("picking " + n);
     if (n > this.size) {
       return null;
     }
@@ -40,6 +38,7 @@ class Pot {
 
     // probably don't need both clauses here
     if (curr.availableFactors < 1 || curr.playerPicked != null) {
+      console.log("that number is already picked! " + n);
       return null;
     }
 
@@ -56,7 +55,7 @@ class Pot {
     // check + mark new unpickables (or just check during decrements?)
     for (let k of this.nums) {
       if (k.availableFactors < 1) {
-        k.cell.addClass("unavailable");
+        k.cell.addClass("unavailable").removeClass("available");
       }
     }
   }
@@ -65,6 +64,7 @@ class Pot {
     if (n > this.size) {
       return null;
     }
+
     let curr = this.nums[n - 1];
     if (curr.playerPicked != null) {
       return null;
@@ -80,7 +80,7 @@ class Pot {
 }
 
 class PotNums {
-  // constant(?)
+  // constants
   val: number;
   cell: any; // maybe figure out actual type
   factors: number[];
@@ -90,12 +90,11 @@ class PotNums {
   availableFactors: number;
   playerPicked: boolean | null;
 
-  constructor(v: number, c: any, m: number[]) {
-    // might need potsize (for multiples)
-    this.val = v;
-    this.cell = c;
-    this.factors = getDivs(v);
-    this.multiples = m;
+  constructor(myVal: number, myCell: any, multiplesList: number[]) {
+    this.val = myVal;
+    this.cell = myCell;
+    this.factors = getDivs(myVal);
+    this.multiples = multiplesList;
 
     this.availableFactors = this.factors.length; // ?
     this.playerPicked = null;
@@ -103,12 +102,12 @@ class PotNums {
 
   pick(): void {
     this.playerPicked = true;
-    this.cell.addClass("picked");
+    this.cell.addClass("picked").removeClass("available");
   }
 
   tax(): void {
     this.playerPicked = false;
-    this.cell.addClass("taxed");
+    this.cell.addClass("taxed").removeClass("available");
     // currently no need to recurse down through factors
   }
 }
@@ -119,6 +118,7 @@ function getDivs(n: number): number[] {
   for (let i = 2; i <= Math.sqrt(n); i++) {
     if (n % i == 0) {
       rtn.push(i);
+      rtn.push(n / i);
     }
   }
 
@@ -127,51 +127,48 @@ function getDivs(n: number): number[] {
 
 $("#button").on({
   click: () => {
-    console.log("running enter...");
-    let potSize = Number($("#taxman-size").val());
+    let potSize = Number($("#taxman-size").val()); // catch non-num error
     console.log("pot size: " + potSize);
 
     let p = new Pot(potSize);
     let rowWidth = 10; // ehh
 
-    console.log("pot made :), first entry:");
-    console.log(p.nums[0]);
+    // ! NEED TO REMEMBER TO CLEAR TABLE
 
-    // NEED TO REMEMBER TO CLEAR TABLE
-
-    let numFullRows = Math.round(potSize / 10 - 1); // not sure the round is needed
+    let numRows = Math.round(potSize / 10); // not sure the round is needed
     let cells: any[] = p.nums.map(function (n) {
       return n.cell;
     });
-    for (let i = 0; i <= numFullRows; i++) {
+    console.log("first cell: ");
+    console.log(cells[0]);
+
+    for (let i = 0; i <= numRows; i++) {
       let row = $("<tr></tr>");
 
+      // probably more elegant way to do this
       for (let j = 0; j < rowWidth; j++) {
         let curr = i * 10 + j;
         if (curr >= potSize) {
           break;
         }
-        row.append(cells[curr]);
+        row.append(cells[curr][0]); // not sure about index?
       }
       $("tbody").append(row);
     }
-    // might need to set n=1 to be unavailable?
+
+    // ?might need to set n=1 to be unavailable?
 
     $("td").on({
       // is text() really the best thing to pull?
-      click: () => {
-        p.pick(Number($(this).text()));
-      }, // arrow syntax?
-      mouseenter: () => {
-        console.log($(this));
+      mouseenter: function () {
         let cellnum = Number($(this).text());
-        console.log("hovering over " + cellnum);
+        // console.log("hovering over " + cellnum);
         let t: PotNums = p.nums[cellnum - 1];
         if (t.availableFactors > 0) {
-          t.cell.css("background-color", "green"); // do this with css onhover?
+          //t.cell.css("background-color", "green"); // do this with css onhover?
 
           $("td")
-            .filter(() => {
+            .filter(function () {
               let facnum = Number($(this).text());
               return (
                 t.factors.includes(facnum) &&
@@ -181,13 +178,17 @@ $("#button").on({
             .addClass("hovered");
         }
       },
-      mouseleave: () => {
+      mouseleave: function () {
         let cellnum = Number($(this).text());
         let t = p.nums[cellnum - 1];
         if (t.availableFactors > 0) {
-          t.cell.css("background-color", "green"); // do this with css onhover?
+          // necessary?
+          //t.cell.css("background-color", "white"); // do this with css onhover?
           $("td").removeClass("hovered");
         }
+      },
+      click: function () {
+        p.pick(Number($(this).text()));
       },
     });
   },
