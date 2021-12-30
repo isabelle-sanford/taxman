@@ -1,3 +1,19 @@
+class PotNumber {
+  val: number;
+  picked: boolean;
+  cell: any;
+
+  constructor(v: number, c: any) {
+    this.val = v;
+    this.cell = c;
+    this.picked = false;
+  }
+
+  pick(): void {
+    this.picked = true;
+  }
+}
+
 // Select the button
 let button = d3.select("#button");
 
@@ -7,6 +23,8 @@ let form = d3.select("#form");
 // Create event handlers
 button.on("click", runEnter);
 form.on("submit", runEnter);
+
+let pot: PotNumber[];
 
 // Complete the event handler function for the form
 function runEnter() {
@@ -33,6 +51,10 @@ function runEnter() {
     for (let j = 0; j <= 10; j++) {
       let cell = row.append("td");
       let num = i * 10 + j + 1;
+
+      let c = new PotNumber(num, cell);
+      pot.push(c);
+
       cell.text(num); // starting at 1!
       cell.attr("class", "available");
       cell.attr("id", "n" + num); //ew
@@ -42,8 +64,15 @@ function runEnter() {
   let lastRow = table.append("tr");
   for (let k = 0; k < inputValue % 10; k++) {
     let cell = lastRow.append("td");
-    cell.text(numFullRows * 10 + k + 1);
+    let num = numFullRows * 10 + k + 1;
+
+    let c = new PotNumber(num, cell);
+    pot.push(c);
+
+    cell.text(num);
     cell.attr("class", "available");
+    cell.attr("id", "n" + num); //ew
+    cell.on("click", playerPick);
   }
 }
 
@@ -76,18 +105,4 @@ function highlighting() {
       // IF THIS IS AVAILABLE
       d3.select(this).style("background-color", "white");
     });
-}
-
-class Number {
-  value: number;
-  picked: boolean;
-
-  constructor(value: number) {
-    this.value = value;
-    this.picked = false;
-  }
-
-  pick(): void {
-    this.picked = true;
-  }
 }

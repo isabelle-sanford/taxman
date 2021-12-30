@@ -1,0 +1,23 @@
+
+
+Features
+- Make hover highlight divisors
+- 
+
+Refactoring
+- Create class 'number' with status that determines color
+- change to typescript
+
+Bugs/problems
+- choosing and then moving mouse off deletes color
+- in jq version: table isn't evenly spaced?
+
+
+Later features
+- connect to go backend logic (?)
+- figure out how to store/calculate divisors efficiently
+- make prettier
+- 
+
+
+

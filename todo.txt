@@ -1,0 +1,33 @@
+
+Website work
+- javascript -> typescript
+- Get hover function working properly (including highlighting divisors)
+- Connect js to backend calculation/gamestate stuff
+- Redo how factors are calculated / stored (see pinned message in chat w/ B)
+- Make prettier
+
+Algorithm/testing work
+- Implement improved greedy algorithm
+- Implement Perlmutter method
+- Implement Hensley method (or try)
+- Brute force optimal sequences
+
+Reading/sources work
+- Figure out why we know optimal score but not sequence
+- Read updated Moniot paper
+- Read papers on OEIS page
+
+Paper/writing work
+- Flesh out 'first prime pick' section with Moniot's logic
+- Add example play for each given strategy (with pictures?)
+- Add initial example of play / improve it
+- Add how Hensley gets concrete/numerical upper & lower bounds
+- do a proper bibliography
+- change n to N?
+- format sidebars/subsections to be clearer
+
+Other
+- Can I include the paper sources as PDFs? Copyright?
+- Update/improve README
+- Future goal: write paper as website, with all algebra in dropdown tabs so you can choose difficulty/how step-by-step it is
+- PDFs - do they need zone identifiers? what are those?
