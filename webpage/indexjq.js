@@ -1,8 +1,12 @@
+// let myPot: PotNums[];
+// let playerScore: number = 0;
+// let taxScore: number = 0;
 var scores = { taxman: 0, player: 0 };
 var pot = [];
+// -----------
 function getDivs(n) {
     var rtn = [1];
-    for (var i = 2; i <= n / 2; i++) {
+    for (var i = 2; i <= Math.sqrt(n); i++) {
         if (n % i == 0) {
             rtn.push(i);
         }
