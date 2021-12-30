@@ -1,27 +1,24 @@
 
 
 Features
-- Track player/taxman scores
+- show win/loss
 
 Refactoring
-- Track availability with the multiples/score/decrement idea
-(Each number contains a list of its multiples and a score representing how many numbers it is a multiple of; when a number is picked each multiple's score is decremented by 1, a number is unavailable if its score is 0)
-- Figure out how to do some coloring with css and on:hover(?)
+
 
 Appearance
-- Center table/etc on the page, or at least add margin
+- Make less... white?
 
 Bugs/problems
-- table isn't evenly spaced?
-- make hitting enter on the form work
-- need to check for newly-unavailable numbers (do multiples thing above)
+- pot table isn't evenly spaced?
+- shouldn't be able to select 1
 
 
 Later features
 - connect to go backend logic (?)
 - figure out how to store/calculate divisors efficiently
 - make prettier
-- Make table row length variable below a certain screen size
+- Make table row length variable below a certain screen size (look at row-cols bootstrap)
 - add move history
 
 

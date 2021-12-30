@@ -1,16 +1,11 @@
-table,
-th,
 td {
   border: 1px solid black;
-  border-collapse: collapse;
 }
 
-/* want this to be lower priority than hover factors */
 .unavailable {
-  background-color: gray !important;
+  background-color: lightgray !important;
 }
 
-/* either figure out how to prioritize or give available a class */
 .available:hover {
   background-color: magenta;
 }
@@ -25,4 +20,14 @@ td {
 
 .picked {
   background-color: green !important;
+}
+
+tbody.score > tr {
+  height: 20px;
+}
+
+tbody.score > tr > td {
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid transparent;
 }

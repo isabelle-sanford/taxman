@@ -16,6 +16,7 @@ class Pot {
       let cell = $("<td></td>")
         .text(i)
         .addClass("available")
+        .addClass("potNum")
         .attr("id", "n" + i); // necessary?
 
       // calculate multiples
@@ -79,6 +80,16 @@ class Pot {
       }
     }
   }
+
+  endGame() {
+    // not super efficient and not sure it's all there?
+    for (let j of this.nums) {
+      if (j.playerPicked == null) {
+        this.taxScore += j.val;
+        j.tax();
+      }
+    }
+  }
 }
 
 class PotNums {
@@ -133,71 +144,86 @@ function getDivs(n: number): number[] {
   return rtn;
 }
 
-$("#button").on({
-  click: () => {
-    let potSize = Number($("#taxman-size").val()); // catch non-num error
-    console.log("pot size: " + potSize);
+$("#button").on("click", runEnter);
+$("input").on("change", runEnter);
 
-    let p = new Pot(potSize);
-    console.log(p);
+function runEnter() {
+  $("#pot").html("");
+  $("#win").text("");
+  let potSize = Number($("#pot-size").val()); // catch non-num error
+  console.log("pot size: " + potSize);
 
-    let rowWidth = 10; // ehh
+  let p = new Pot(potSize);
+  console.log(p);
 
-    // ! NEED TO REMEMBER TO CLEAR TABLE
+  let rowWidth = 10; // ehh
 
-    let numRows = Math.round(potSize / 10); // not sure the round is needed
-    let cells: any[] = p.nums.map(function (n) {
-      return n.cell;
-    });
+  let numRows = Math.round(potSize / 10); // not sure the round is needed
+  let cells: any[] = p.nums.map(function (n) {
+    return n.cell;
+  });
 
-    for (let i = 0; i <= numRows; i++) {
-      let row = $("<tr></tr>");
+  for (let i = 0; i <= numRows; i++) {
+    let row = $("<tr></tr>");
 
-      // probably more elegant way to do this
-      for (let j = 0; j < rowWidth; j++) {
-        let curr = i * 10 + j;
-        if (curr >= potSize) {
-          break;
-        }
-        row.append(cells[curr][0]); // not sure about index?
+    // probably more elegant way to do this
+    for (let j = 0; j < rowWidth; j++) {
+      let curr = i * 10 + j;
+      if (curr >= potSize) {
+        break;
       }
-      $("tbody").append(row);
+      row.append(cells[curr][0]); // not sure about index?
     }
+    $("#pot").append(row);
+  }
 
-    // ?might need to set n=1 to be unavailable?
+  // ?might need to set n=1 to be unavailable?
 
-    $("td").on({
-      // is text() really the best thing to pull?
-      mouseenter: function () {
-        let cellnum = Number($(this).text());
-        // console.log("hovering over " + cellnum);
-        let t: PotNums = p.nums[cellnum - 1];
-        if (t.availableFactors > 0) {
-          //t.cell.css("background-color", "green"); // do this with css onhover?
+  let playing = true;
 
-          $("td")
-            .filter(function () {
-              let facnum = Number($(this).text());
-              return (
-                t.factors.includes(facnum) &&
-                p.nums[facnum - 1].playerPicked == null
-              );
-            })
-            .addClass("hovered");
+  $(".potNum").on({
+    // is text() really the best thing to pull?
+    mouseenter: function () {
+      let cellnum = Number($(this).text());
+      // console.log("hovering over " + cellnum);
+      let t: PotNums = p.nums[cellnum - 1];
+      if (t.availableFactors > 0) {
+        //t.cell.css("background-color", "green"); // do this with css onhover?
+
+        $(".potNum")
+          .filter(function () {
+            let facnum = Number($(this).text());
+            return (
+              t.factors.includes(facnum) &&
+              p.nums[facnum - 1].playerPicked == null
+            );
+          })
+          .addClass("hovered");
+      }
+    },
+    mouseleave: function () {
+      let cellnum = Number($(this).text());
+      let t = p.nums[cellnum - 1];
+
+      // if statement checking for not-yet-picked?
+      //t.cell.css("background-color", "white"); // do this with css onhover?
+      $(".potNum").removeClass("hovered");
+    },
+    click: function () {
+      p.pick(Number($(this).text()));
+      console.log(p);
+      $("#playerscore").text(p.playerScore);
+      $("#taxmanscore").text(p.taxScore);
+
+      if (!$(".potNum").hasClass("available")) {
+        p.endGame();
+        if (p.playerScore > p.taxScore) {
+          $("#win").text("YOU WON!!!!");
+        } else {
+          $("#win").text("YOU LOST!!!!");
         }
-      },
-      mouseleave: function () {
-        let cellnum = Number($(this).text());
-        let t = p.nums[cellnum - 1];
-
-        // if statement checking for not-yet-picked?
-        //t.cell.css("background-color", "white"); // do this with css onhover?
-        $("td").removeClass("hovered");
-      },
-      click: function () {
-        p.pick(Number($(this).text()));
-        console.log(p);
-      },
-    });
-  },
-});
+        // add tie condition
+      }
+    },
+  });
+}
