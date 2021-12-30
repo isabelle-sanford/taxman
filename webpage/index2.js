@@ -33,19 +33,17 @@ class Pot {
         curr.pick();
         this.playerScore += n;
         for (let i of curr.multiples) {
-            this.nums[i - 1].availableFactors--; // can this go below 0?
+            if (--this.nums[i - 1].availableFactors < 1) {
+                // need to check whether picked or no?
+                this.nums[i - 1].cell.addClass("unavailable").removeClass("available");
+            } // can this go below 0?
         }
         for (let j of curr.factors) {
-            this.nums[j - 1].tax();
-        }
-        // check + mark new unpickables (or just check during decrements?)
-        for (let k of this.nums) {
-            if (k.availableFactors < 1) {
-                k.cell.addClass("unavailable").removeClass("available");
-            }
+            this.tax(this.nums[j - 1].val);
         }
     }
     tax(n) {
+        // maybe just pass in potnum? internal func anyway
         if (n > this.size) {
             return null;
         }
@@ -56,7 +54,10 @@ class Pot {
         this.taxScore += n;
         curr.tax();
         for (let i of curr.multiples) {
-            this.nums[i - 1].availableFactors--;
+            if (--this.nums[i - 1].availableFactors < 1 &&
+                this.nums[i - 1].playerPicked == null) {
+                this.nums[i - 1].cell.addClass("unavailable").removeClass("available");
+            }
         }
     }
 }
@@ -71,11 +72,15 @@ class PotNums {
     }
     pick() {
         this.playerPicked = true;
-        this.cell.addClass("picked").removeClass("available");
+        this.cell
+            .addClass("picked")
+            .removeClass("available")
+            .removeClass("unavailable");
     }
     tax() {
+        this.availableFactors = 0; // not necessary?
         this.playerPicked = false;
-        this.cell.addClass("taxed").removeClass("available");
+        this.cell.addClass("taxed").removeClass("available unavailable");
         // currently no need to recurse down through factors
     }
 }
@@ -84,7 +89,9 @@ function getDivs(n) {
     for (let i = 2; i <= Math.sqrt(n); i++) {
         if (n % i == 0) {
             rtn.push(i);
-            rtn.push(n / i);
+            if (n / i != i) {
+                rtn.push(n / i);
+            }
         }
     }
     return rtn;
@@ -94,14 +101,13 @@ $("#button").on({
         let potSize = Number($("#taxman-size").val()); // catch non-num error
         console.log("pot size: " + potSize);
         let p = new Pot(potSize);
+        console.log(p);
         let rowWidth = 10; // ehh
         // ! NEED TO REMEMBER TO CLEAR TABLE
         let numRows = Math.round(potSize / 10); // not sure the round is needed
         let cells = p.nums.map(function (n) {
             return n.cell;
         });
-        console.log("first cell: ");
-        console.log(cells[0]);
         for (let i = 0; i <= numRows; i++) {
             let row = $("<tr></tr>");
             // probably more elegant way to do this
@@ -135,14 +141,13 @@ $("#button").on({
             mouseleave: function () {
                 let cellnum = Number($(this).text());
                 let t = p.nums[cellnum - 1];
-                if (t.availableFactors > 0) {
-                    // necessary?
-                    //t.cell.css("background-color", "white"); // do this with css onhover?
-                    $("td").removeClass("hovered");
-                }
+                // if statement checking for not-yet-picked?
+                //t.cell.css("background-color", "white"); // do this with css onhover?
+                $("td").removeClass("hovered");
             },
             click: function () {
                 p.pick(Number($(this).text()));
+                console.log(p);
             },
         });
     },

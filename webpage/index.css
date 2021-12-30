@@ -7,7 +7,7 @@ td {
 
 /* want this to be lower priority than hover factors */
 .unavailable {
-  background-color: gray;
+  background-color: gray !important;
 }
 
 /* either figure out how to prioritize or give available a class */
