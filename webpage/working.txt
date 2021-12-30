@@ -6,10 +6,8 @@ Features
 
 Refactoring
 - Create class 'number' with status that determines color
-- change to typescript
 
 Bugs/problems
-- choosing and then moving mouse off deletes color
 - in jq version: table isn't evenly spaced?
 
 

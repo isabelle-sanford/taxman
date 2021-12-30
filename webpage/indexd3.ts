@@ -1,4 +1,4 @@
-class PotNumber {
+class PotNumber1 {
   val: number;
   picked: boolean;
   cell: any;
@@ -24,7 +24,7 @@ let form = d3.select("#form");
 button.on("click", runEnter);
 form.on("submit", runEnter);
 
-let pot: PotNumber[];
+let pot1: PotNumber1[];
 
 // Complete the event handler function for the form
 function runEnter() {
@@ -53,7 +53,7 @@ function runEnter() {
       let num = i * 10 + j + 1;
 
       let c = new PotNumber(num, cell);
-      pot.push(c);
+      pot1.push(c);
 
       cell.text(num); // starting at 1!
       cell.attr("class", "available");

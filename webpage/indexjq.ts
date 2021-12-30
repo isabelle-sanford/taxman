@@ -1,14 +1,28 @@
+interface PotNumber {
+  val: number;
+  available: boolean;
+  cell: any;
+  taxman?: boolean;
+  player?: boolean;
+}
+
+let pot: PotNumber[] = [];
+
 $("#button").click(function () {
   console.log("running enter...");
 
-  let potSize = $("#taxman-size").val(); // convert to num?
+  let potSize = Number($("#taxman-size").val()); // convert to num?
 
   console.log(potSize);
+
+  //   if (typeof potSize != "number") {
+  //     console.log("Not number!" + typeof potSize);
+  //     return;
+  //   }
 
   let numFullRows = Math.round(potSize / 10 - 1); // not sure the round is needed
   for (let i = 0; i <= numFullRows; i++) {
     let row = $("<tr></tr>");
-    console.log("added a row");
 
     for (let j = 0; j < 10; j++) {
       let num = i * 10 + j + 1;
@@ -20,13 +34,16 @@ $("#button").click(function () {
         .attr("id", "n" + num)
         .addClass("available"); // remember not to do this on 1
 
+      pot.push({ val: num, available: true, cell: cell });
+
       row.append(cell);
     }
     $("tbody").append(row);
   }
 
-  $("td")
-    .first()
+  pot[0].available = false;
+  pot[0].taxman = true;
+  pot[0].cell
     .addClass("unavailable")
     .removeClass("available")
     .css("background-color", "red");
@@ -49,4 +66,5 @@ $("#button").click(function () {
         .removeClass("available");
     },
   });
+  //console.log(pot);
 });
