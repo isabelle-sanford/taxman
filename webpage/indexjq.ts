@@ -1,12 +1,59 @@
 interface PotNumber {
   val: number;
-  available: boolean;
+  available: boolean; // ie has divs left
   cell: any;
+  divs: number[];
+  picked: boolean;
   taxman?: boolean;
   player?: boolean;
 }
 
+let scores = { taxman: 0, player: 0 };
+
 let pot: PotNumber[] = [];
+
+function getDivs(n: number): number[] {
+  let rtn = [1];
+
+  for (let i = 2; i <= n / 2; i++) {
+    if (n % i == 0) {
+      rtn.push(i);
+    }
+  }
+
+  return rtn;
+}
+
+function pickNum(n: number): void {
+  let picked = pot[n - 1];
+
+  if (!picked.available) {
+    return;
+  }
+
+  picked.available = false;
+  picked.picked = true;
+  picked.player = true;
+  picked.cell
+    .css("background-color", "red")
+    .addClass("unavailable")
+    .removeClass("available");
+
+  console.log(picked.divs);
+  // need to search and find newly unavailable nums
+  for (let i of picked.divs) {
+    let thisDiv = pot[i - 1];
+    if (!thisDiv.picked) {
+      thisDiv.picked = true;
+      thisDiv.taxman = true;
+      thisDiv.available = false;
+      thisDiv.cell
+        .addClass("unavailable")
+        .removeClass("available")
+        .css("background-color", "gray");
+    }
+  }
+}
 
 $("#button").click(function () {
   console.log("running enter...");
@@ -14,11 +61,6 @@ $("#button").click(function () {
   let potSize = Number($("#taxman-size").val()); // convert to num?
 
   console.log(potSize);
-
-  //   if (typeof potSize != "number") {
-  //     console.log("Not number!" + typeof potSize);
-  //     return;
-  //   }
 
   let numFullRows = Math.round(potSize / 10 - 1); // not sure the round is needed
   for (let i = 0; i <= numFullRows; i++) {
@@ -34,7 +76,13 @@ $("#button").click(function () {
         .attr("id", "n" + num)
         .addClass("available"); // remember not to do this on 1
 
-      pot.push({ val: num, available: true, cell: cell });
+      pot.push({
+        val: num,
+        available: true,
+        cell: cell,
+        divs: getDivs(num),
+        picked: false,
+      });
 
       row.append(cell);
     }
@@ -50,20 +98,36 @@ $("#button").click(function () {
 
   $("td").on({
     mouseenter: function () {
-      if ($(this).hasClass("available")) {
+      let t = pot[Number($(this).text()) - 1];
+      if (t.available) {
         $(this).css("background-color", "green");
+
+        $("td")
+          .filter(function () {
+            return t.divs.includes(Number($(this).text()));
+          })
+          .filter(function () {
+            return pot[Number($(this).text()) - 1].available;
+          })
+          .css("background-color", "pink");
       }
     },
     mouseleave: function () {
-      if ($(this).hasClass("available")) {
+      let t = pot[Number($(this).text()) - 1];
+      if (t.available) {
         $(this).css("background-color", "white");
+        $("td")
+          .filter(function () {
+            return t.divs.includes(Number($(this).text()));
+          })
+          .filter(function () {
+            return pot[Number($(this).text()) - 1].available;
+          })
+          .css("background-color", "white");
       }
     },
     click: function () {
-      $(this)
-        .css("background-color", "red")
-        .addClass("unavailable")
-        .removeClass("available");
+      pickNum(Number($(this).text()));
     },
   });
   //console.log(pot);

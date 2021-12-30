@@ -1,21 +1,25 @@
 
 
 Features
-- Make hover highlight divisors
-- 
+- Make hover highlight divisors. Option 1: Calculate divisors for each number at start and store in potNumber instances
+- Track scores
 
 Refactoring
-- Create class 'number' with status that determines color
+
+
+Appearance
+- Center table/etc on the page, or at least add margin
 
 Bugs/problems
 - in jq version: table isn't evenly spaced?
+- make entering on the form work
 
 
 Later features
 - connect to go backend logic (?)
 - figure out how to store/calculate divisors efficiently
 - make prettier
-- 
+- Make table row length variable below a certain screen size
 
 
 
