@@ -1,93 +1,178 @@
-// Select the button
-let button = d3.select("#button");
-
-// Select the form
-let form = d3.select("#form");
-
-// Create event handlers
-button.on("click", runEnter);
-form.on("submit", runEnter);
-
-// Complete the event handler function for the form
-function runEnter() {
-  console.log("Running enter...");
-  // Prevent the page from refreshing
-  d3.event.preventDefault();
-
-  // Select the input element and get the raw HTML node
-  let inputElement = d3.select("#taxman-size");
-
-  console.log("Input element: " + inputElement);
-
-  // Get the value property of the input element
-  let inputValue = inputElement.property("value");
-
-  console.log("Input value: " + inputValue);
-
-  let table = d3.select("tbody");
-  table.html("");
-
-  let numFullRows = Math.round(inputValue / 10 - 1); // not sure the round is needed
-  for (let i = 0; i < numFullRows; i++) {
-    let row = table.append("tr");
-    for (let j = 0; j <= 10; j++) {
-      let cell = row.append("td");
-      let num = i * 10 + j + 1;
-      cell.text(num); // starting at 1!
-      cell.attr("class", "available");
-      cell.attr("id", "n" + num); //ew
-      cell.on("click", playerPick);
+"use strict";
+class Pot {
+    constructor(potsize) {
+        this.size = potsize;
+        this.playerScore = 0;
+        this.taxScore = 0;
+        this.nums = []; // unnecessary?
+        // this could have better variables
+        for (let i = 1; i <= potsize; i++) {
+            let cell = $("<td></td>")
+                .text(i)
+                .addClass("available")
+                .addClass("potNum")
+                .attr("id", "n" + i); // necessary?
+            // calculate multiples
+            let multiplesList = [];
+            for (let j = i * 2; j < potsize; j += i) {
+                multiplesList.push(j);
+            }
+            this.nums.push(new PotNums(i, cell, multiplesList));
+        }
     }
-  }
-  let lastRow = table.append("tr");
-  for (let k = 0; k < inputValue % 10; k++) {
-    let cell = lastRow.append("td");
-    cell.text(numFullRows * 10 + k + 1);
-    cell.attr("class", "available");
-  }
+    pick(n) {
+        console.log("picking " + n);
+        if (n > this.size) {
+            return null;
+        }
+        let curr = this.nums[n - 1];
+        // probably don't need both clauses here
+        if (curr.availableFactors < 1 || curr.playerPicked != null) {
+            console.log("that number is already picked! " + n);
+            return null;
+        }
+        curr.pick();
+        this.playerScore += n;
+        for (let i of curr.multiples) {
+            if (--this.nums[i - 1].availableFactors < 1) {
+                // need to check whether picked or no?
+                this.nums[i - 1].cell.addClass("unavailable").removeClass("available");
+            } // can this go below 0?
+        }
+        for (let j of curr.factors) {
+            this.tax(this.nums[j - 1].val);
+        }
+    }
+    tax(n) {
+        // maybe just pass in potnum? internal func anyway
+        if (n > this.size) {
+            return null;
+        }
+        let curr = this.nums[n - 1];
+        if (curr.playerPicked != null) {
+            return null;
+        }
+        this.taxScore += n;
+        curr.tax();
+        for (let i of curr.multiples) {
+            if (--this.nums[i - 1].availableFactors < 1 &&
+                this.nums[i - 1].playerPicked == null) {
+                this.nums[i - 1].cell.addClass("unavailable").removeClass("available");
+            }
+        }
+    }
+    endGame() {
+        // not super efficient and not sure it's all there?
+        for (let j of this.nums) {
+            if (j.playerPicked == null) {
+                this.taxScore += j.val;
+                j.tax();
+            }
+        }
+    }
 }
-
-let table = d3.select("tbody");
-let tableEvent = table.on("mouseover", highlighting);
-let tableClick = table.on("click", playerPick);
-
-function playerPick() {
-  console.log("picked a thing!");
-  d3.selectAll(".available").on("click", function () {
-    d3.select(this)
-      .style("background-color", "green")
-      .attr("class", "unavailable");
-  });
-  //d3.select("#n" + num).style('background', 'black');
+class PotNums {
+    constructor(myVal, myCell, multiplesList) {
+        this.val = myVal;
+        this.cell = myCell;
+        this.factors = getDivs(myVal);
+        this.multiples = multiplesList;
+        this.availableFactors = this.factors.length; // ?
+        this.playerPicked = null;
+    }
+    pick() {
+        this.playerPicked = true;
+        this.cell
+            .addClass("picked")
+            .removeClass("available")
+            .removeClass("unavailable");
+    }
+    tax() {
+        this.availableFactors = 0; // not necessary?
+        this.playerPicked = false;
+        this.cell.addClass("taxed").removeClass("available unavailable");
+        // currently no need to recurse down through factors
+    }
 }
-
-function highlighting() {
-  d3.selectAll(".available")
-    .on("mouseover", function () {
-      d3.select(this).style("background-color", "orange");
-
-      // Get current event info
-      console.log(d3.event);
-
-      // Get x & y co-ordinates
-      console.log(d3.mouse(this));
-    })
-    .on("mouseout", function () {
-      // IF THIS IS AVAILABLE
-      d3.select(this).style("background-color", "white");
+function getDivs(n) {
+    let rtn = [1];
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i == 0) {
+            rtn.push(i);
+            if (n / i != i) {
+                rtn.push(n / i);
+            }
+        }
+    }
+    return rtn;
+}
+$("#button").on("click", runEnter);
+$("input").on("change", runEnter);
+function runEnter() {
+    $("#pot").html("");
+    $("#win").text("");
+    let potSize = Number($("#pot-size").val()); // catch non-num error
+    console.log("pot size: " + potSize);
+    let p = new Pot(potSize);
+    console.log(p);
+    let rowWidth = 10; // ehh
+    let numRows = Math.round(potSize / 10); // not sure the round is needed
+    let cells = p.nums.map(function (n) {
+        return n.cell;
     });
-}
-
-class Number {
-  value: number;
-  picked: boolean;
-
-  constructor(value: number) {
-    this.value = value;
-    this.picked = false;
-  }
-
-  pick(): void {
-    this.picked = true;
-  }
+    for (let i = 0; i <= numRows; i++) {
+        let row = $("<tr></tr>");
+        // probably more elegant way to do this
+        for (let j = 0; j < rowWidth; j++) {
+            let curr = i * 10 + j;
+            if (curr >= potSize) {
+                break;
+            }
+            row.append(cells[curr][0]); // not sure about index?
+        }
+        $("#pot").append(row);
+    }
+    // ?might need to set n=1 to be unavailable?
+    let playing = true;
+    $(".potNum").on({
+        // is text() really the best thing to pull?
+        mouseenter: function () {
+            let cellnum = Number($(this).text());
+            // console.log("hovering over " + cellnum);
+            let t = p.nums[cellnum - 1];
+            if (t.availableFactors > 0) {
+                //t.cell.css("background-color", "green"); // do this with css onhover?
+                $(".potNum")
+                    .filter(function () {
+                    let facnum = Number($(this).text());
+                    return (t.factors.includes(facnum) &&
+                        p.nums[facnum - 1].playerPicked == null);
+                })
+                    .addClass("hovered");
+            }
+        },
+        mouseleave: function () {
+            let cellnum = Number($(this).text());
+            let t = p.nums[cellnum - 1];
+            // if statement checking for not-yet-picked?
+            //t.cell.css("background-color", "white"); // do this with css onhover?
+            $(".potNum").removeClass("hovered");
+        },
+        click: function () {
+            p.pick(Number($(this).text()));
+            console.log(p);
+            if (!$(".potNum").hasClass("available")) {
+                p.endGame();
+                if (p.playerScore > p.taxScore) {
+                    $("#win").text("YOU WON!!!!");
+                }
+                else {
+                    $("#win").text("YOU LOST!!!!");
+                }
+                // add tie condition
+            }
+            $("#playerscore").text(p.playerScore);
+            $("#taxmanscore").text(p.taxScore);
+        },
+    });
 }

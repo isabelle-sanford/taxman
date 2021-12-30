@@ -212,8 +212,6 @@ function runEnter() {
     click: function () {
       p.pick(Number($(this).text()));
       console.log(p);
-      $("#playerscore").text(p.playerScore);
-      $("#taxmanscore").text(p.taxScore);
 
       if (!$(".potNum").hasClass("available")) {
         p.endGame();
@@ -224,6 +222,8 @@ function runEnter() {
         }
         // add tie condition
       }
+      $("#playerscore").text(p.playerScore);
+      $("#taxmanscore").text(p.taxScore);
     },
   });
 }
