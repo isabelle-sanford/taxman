@@ -4,3 +4,16 @@ td {
   border: 1px solid black;
   border-collapse: collapse;
 }
+
+.taxed {
+  background-color: red;
+}
+
+.picked {
+  background-color: green;
+}
+
+/* want this to be lower priority than hover factors */
+.unavailable {
+  background-color: gray;
+}

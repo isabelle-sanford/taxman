@@ -1,18 +1,20 @@
 
 
 Features
-- Make hover highlight divisors. Option 1: Calculate divisors for each number at start and store in potNumber instances
-- Track scores
+- Track player/taxman scores
 
 Refactoring
-
+- Track availability with the multiples/score/decrement idea
+(Each number contains a list of its multiples and a score representing how many numbers it is a multiple of; when a number is picked each multiple's score is decremented by 1, a number is unavailable if its score is 0)
+- Figure out how to do some coloring with css and on:hover(?)
 
 Appearance
 - Center table/etc on the page, or at least add margin
 
 Bugs/problems
-- in jq version: table isn't evenly spaced?
-- make entering on the form work
+- table isn't evenly spaced?
+- make hitting enter on the form work
+- need to check for newly-unavailable numbers (do multiples thing above)
 
 
 Later features
@@ -20,6 +22,8 @@ Later features
 - figure out how to store/calculate divisors efficiently
 - make prettier
 - Make table row length variable below a certain screen size
+- add move history
+
 
 
 

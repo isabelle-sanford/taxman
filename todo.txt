@@ -1,16 +1,17 @@
 
 Website work
-- javascript -> typescript
-- Get hover function working properly (including highlighting divisors)
-- Connect js to backend calculation/gamestate stuff
+- Connect js to backend calculation/gamestate stuff (?)
 - Redo how factors are calculated / stored (see pinned message in chat w/ B)
 - Make prettier
+- Track player/taxman scores
+- implement move history and possibly the ability to undo/go back to any past move
 
 Algorithm/testing work
 - Implement improved greedy algorithm
 - Implement Perlmutter method
 - Implement Hensley method (or try)
 - Brute force optimal sequences
+- Optional: have each number store only the list of elements with exactly one of its prime factors missing, and recurse down through those numbers when taxing
 
 Reading/sources work
 - Figure out why we know optimal score but not sequence
@@ -29,5 +30,11 @@ Paper/writing work
 Other
 - Can I include the paper sources as PDFs? Copyright?
 - Update/improve README
-- Future goal: write paper as website, with all algebra in dropdown tabs so you can choose difficulty/how step-by-step it is
 - PDFs - do they need zone identifiers? what are those?
+
+Future/stretch goals
+- write paper as website, with all algebra in dropdown tabs so you can choose difficulty/how step-by-step it is
+- Take algorithm test outcomes and turn into a set of graphs showing their relative performance
+    - scatter/line plot, x axis is pot size, y axis is score, color is algorithm, maybe hovering shows sequence
+    - selecting a particular number shows sequence, score, and bar chart for each algorithm (available in spolier box at bottom of play page, for easy reference)
+

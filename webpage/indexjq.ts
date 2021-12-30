@@ -1,4 +1,142 @@
+
+
+let myPot: PotNums[];
+let playerScore: number = 0;
+let taxScore: number = 0;
+
+// interface or class?
+class Pot {
+    size: number;
+    nums: PotNums[];
+    playerScore: number;
+    taxScore: number;
+
+    constructor(n: number) {
+        this.size = n;
+        this.playerScore = 0;
+        this.taxScore = 0;
+
+        let nums = PotNums[];
+
+        for (let i = 0; i < n; i++) {
+            let cell = $("<td></td>").text(i).attr("id", "n" + i);
+
+            this.nums.push(new PotNums(i, cell))
+        }
+    }
+
+    pick(n: number) {
+        if (n > this.size) {return null}
+
+        let curr = this.nums[n-1];
+
+        // probably don't need both clauses here
+        if (curr.availableFactors < 1 || curr.playerPicked != null) { return null }
+    
+        curr.pick();
+
+        this.playerScore += n;
+        // !increment taxScore
+        // (maybe have curr.pick() return taxman sum?)
+    }
+
+    tax(n: number) {
+        if (n > this.size) {return null}
+        let curr = this.nums[n-1];
+        if (curr.playerPicked != null) { return null }
+
+        this.taxScore += n;
+        curr.tax();
+
+        for (let i of curr.multiples) {
+            this.nums[i-1].availableFactors--;
+        }
+
+    }
+
+}
+
+
+class PotNums {
+    // constant(?)
+    val: number;
+    cell: any; // maybe figure out actual type
+    factors: number[];
+    multiples: number[];
+
+    // changeable
+    availableFactors: number;
+    picked: boolean; // unnecessary?
+    playerPicked: boolean | null;
+
+    constructor(v: number, c: any) { // might need potsize (for multiples)
+        this.val = v;
+        this.cell = c;
+
+        // !calculate factors & multiples
+        
+        this.picked = false;
+        this.playerPicked = null;
+    }
+
+    pick(): void {
+        this.picked = true;
+        this.playerPicked = true;
+
+        // update cell properties
+        this.cell.addClass("picked");
+        
+
+        for (let i of this.multiples) {
+            myPot[i-1].availableFactors--; // can this go below 0?
+        }
+
+        for (let j of this.factors) {
+            myPot[j].tax(); 
+        }
+
+        // increment player score?
+
+        // check + mark new unpickables (alternatively do this when decrementing hits 0)
+        for (let k of myPot) {
+            if (k.availableFactors < 1) {
+                // ! update cell properties
+            }
+        }
+    }
+
+    tax(): void {
+        this.picked = true;
+        this.playerPicked = false;
+        
+        // update cell properties
+        this.cell.addClass("taxed");
+
+        // currently no need to recurse down through factors
+
+    }
+
+}
+
+
+interface pots2 {
+  val: number;
+  cell: any;
+  factors: number[];
+  multiples: number[];
+  availableFactors: number; // score, initially equivalent to len(factors), unavailable when 0
+  picked: boolean; // maybe unnecessary?
+  playerPicked: boolean | null; // true if player picked, false if taxed, null if unpicked
+}
+
+// Statuses: not picked, has factors remaining (available)
+// not picked, no unpicked factors (unavailable)
+// picked, by player
+// picked, by taxman
+// could just do numerical 1-4?
+
 interface PotNumber {
+  // maybe make class instead?
   val: number;
   available: boolean; // ie has divs left
   cell: any;
