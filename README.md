@@ -1,2 +1,3 @@
 # taxman
-Program replicating the Taxman computer game and trying various algorithms with it. See TheTaxmanSummary.pdf for further information. 
+
+This repository contains implementations and analysis of the Taxman Game, a classic math game and computer science exercise from the early 1970s. To play it yourself, go [here](https://isabelle-sanford.github.io/taxman/). To read a thorough explanation of what we know about solving it, see my paper [here](https://isabelle-sanford.github.io/taxman/AboutTheTaxman.pdf). The [sources](https://github.com/isabelle-sanford/taxman/sources) folder contains the sources I referenced in that paper, and the algorithms they outline are (partially) implemented in the [algorithms](https://github.com/isabelle-sanford/taxman/sources) folder. More to come!

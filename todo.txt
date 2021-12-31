@@ -19,6 +19,7 @@ Reading/sources work
 - Read papers on OEIS page
 
 Paper/writing work
+- Replace 'you can play it here' link with mine
 - Flesh out 'first prime pick' section with Moniot's logic
 - Add example play for each given strategy (with pictures?)
 - Add initial example of play / improve it
@@ -26,6 +27,10 @@ Paper/writing work
 - do a proper bibliography
 - change n to N?
 - format sidebars/subsections to be clearer
+- formatting: links? header?
+- figure out how to make tex put PDF into root of repository
+- figure out how to remove page number from bottom of page 1
+- proper abstract?
 
 Other
 - Can I include the paper sources as PDFs? Copyright?
